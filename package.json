@@ -1,0 +1,18 @@
+{
+  "name": "react-native-android-navigation",
+  "version": "1.0.1",
+  "description": "android intent wrapper that allows you to start activities and to send extras to them",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react-native",
+    "android",
+    "navigation",
+    "intent",
+    "activity"
+  ],
+  "author": "Artemiy Lunkov <a.lunkov@evotor.ru> (http://evotor.ru/)",
+  "license": "ISC"
+}
