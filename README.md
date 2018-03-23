@@ -1,4 +1,4 @@
-# React Native Android Navigation
+# React Native Android Navigation [![npm version](https://badge.fury.io/js/react-native-android-navigation.svg)](https://badge.fury.io/js/react-native-android-navigation)
 
 *Let your application feel at ease.*
 

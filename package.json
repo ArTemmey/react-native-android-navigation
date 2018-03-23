@@ -1,7 +1,11 @@
 {
   "name": "react-native-android-navigation",
-  "version": "1.0.1",
-  "description": "android intent wrapper that allows you to start activities and to send extras to them",
+  "version": "1.0.2",
+  "description": "Android native navigation wrapper for React Native",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ArtemiyDmtrvch/react-native-android-navigation.git"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
