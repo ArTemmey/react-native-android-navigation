@@ -24,6 +24,5 @@ export {
     BackPressListener,
     ActivityEventListener,
     CustomServiceEventListener,
-    AndroidNavigatorEventListener,
     NavigationErrorMessage
 }
