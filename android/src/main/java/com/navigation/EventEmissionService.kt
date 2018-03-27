@@ -14,7 +14,7 @@ class EventEmissionService : HeadlessJsTaskService() {
 
     override fun getTaskConfig(intent: Intent): HeadlessJsTaskConfig {
         return HeadlessJsTaskConfig(
-                "CustomEventEmission",
+                "GlobalEventEmission",
                 if (intent.extras == null) Arguments.createMap() else Converter.writeIntentExtras(intent.extras!!),
                 0,
                 true

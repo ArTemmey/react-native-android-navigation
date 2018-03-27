@@ -20,8 +20,8 @@ object Converter {
     internal fun readIntent(current: Context?, source: Map<*, *>, callback: Callback): Intent? {
         val result = createIntent(
                 current,
-                source["className"] as String?,
                 source["packageName"] as String?,
+                source["className"] as String?,
                 source["action"] as String?,
                 source["customServiceEventName"] as String?,
                 callback
@@ -49,33 +49,36 @@ object Converter {
         return result
     }
 
-    private fun createIntent(current: Context?, className: String?, packageName: String?, action: String?, customServiceEventName: String?, callback: Callback): Intent? {
+    private fun createIntent(current: Context?,
+                             packageName: String?,
+                             className: String?,
+                             action: String?,
+                             customServiceEventName: String?,
+                             callback: Callback): Intent? {
         var result: Intent? = null
         if (customServiceEventName != null) {
-            result = Intent(current, EventEmissionService::class.java)
-            result.putExtra("type", customServiceEventName)
+            result = if (packageName != null) {
+                createIntentWithPackageAndClass(
+                        current!!.packageManager,
+                        packageName,
+                        "com.navigation.EventEmissionService",
+                        callback
+                )
+            } else {
+                Intent(current, EventEmissionService::class.java)
+            }
+            if (result != null) {
+                result.putExtra("type", customServiceEventName)
+            }
         } else {
-            val manager = current!!.packageManager
             if (className != null) {
                 if (packageName != null) {
-                    try {
-                        manager.getPackageInfo(packageName, 0)
-                        result = Intent()
-                    } catch (e: PackageManager.NameNotFoundException) {
-                        callback.invoke(writeError("TARGET_PACKAGE_NOT_FOUND"))
-                    }
-
-                    if (result != null) {
-                        result.component = ComponentName(packageName, className)
-                        val list = manager.queryIntentActivities(
-                                result,
-                                PackageManager.MATCH_DEFAULT_ONLY
-                        )
-                        if (list.size == 0) {
-                            result = null
-                            callback.invoke(writeError("TARGET_CLASS_NOT_FOUND"))
-                        }
-                    }
+                   result = createIntentWithPackageAndClass(
+                           current!!.packageManager,
+                           packageName,
+                           className,
+                           callback
+                   )
                 } else {
                     try {
                         val dest = Class.forName(className)
@@ -83,13 +86,12 @@ object Converter {
                     } catch (e: ClassNotFoundException) {
                         callback.invoke(writeError("TARGET_CLASS_NOT_FOUND"))
                     }
-
                 }
                 if (result != null && action != null) {
                     result.action = action
                 }
             } else if (packageName != null) {
-                result = manager.getLaunchIntentForPackage(packageName)
+                result = current!!.packageManager.getLaunchIntentForPackage(packageName)
                 if (result == null) {
                     callback.invoke(writeError("TARGET_PACKAGE_NOT_FOUND"))
                 } else if (action != null) {
@@ -99,6 +101,37 @@ object Converter {
                 result = Intent(action)
             } else {
                 result = Intent()
+            }
+        }
+        return result
+    }
+
+    private fun createIntentWithPackageAndClass(manager: PackageManager,
+                                                packageName: String,
+                                                className: String,
+                                                callback: Callback): Intent? {
+        var result: Intent? = null
+        try {
+            manager.getPackageInfo(packageName, 0)
+            result = Intent()
+        } catch (e: PackageManager.NameNotFoundException) {
+            callback.invoke(writeError("TARGET_PACKAGE_NOT_FOUND"))
+        }
+        if (result != null) {
+            result.component = ComponentName(packageName, className)
+            var list = manager.queryIntentActivities(
+                    result,
+                    PackageManager.MATCH_DEFAULT_ONLY
+            )
+            if (list.size == 0) {
+                list = manager.queryIntentServices(
+                        result,
+                        PackageManager.MATCH_DEFAULT_ONLY
+                )
+                if(list.size == 0) {
+                    result = null
+                    callback.invoke(writeError("TARGET_CLASS_NOT_FOUND"))
+                }
             }
         }
         return result
@@ -189,6 +222,8 @@ object Converter {
             is String -> result.putString(key, item)
             is Map<*, *> -> result.putMap(key, writeIntentExtraObject(item))
             is List<*> -> result.putArray(key, writeIntentExtraArray(item))
+            is WritableMap -> result.putMap(key, item)
+            is WritableArray -> result.putArray(key, item)
             is Bundle -> result.putMap(key, writeIntentExtras(item))
         }
     }
@@ -212,9 +247,18 @@ object Converter {
                 is String -> result.pushString(item)
                 is Map<*, *> -> result.pushMap(writeIntentExtraObject(item))
                 is List<*> -> result.pushArray(writeIntentExtraArray(item))
+                is WritableMap -> result.pushMap(item)
+                is WritableArray -> result.pushArray(item)
                 is Bundle -> result.pushMap(writeIntentExtras(item))
             }
         }
+        return result
+    }
+
+    internal fun writeLocalEvent(eventName: String, vararg data: Any?): WritableMap {
+        val result: WritableMap = Arguments.createMap()
+        result.putString("type", eventName)
+        result.putArray("extras", writeIntentExtraArray(data.asList()))
         return result
     }
 

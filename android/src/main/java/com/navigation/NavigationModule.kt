@@ -21,8 +21,13 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
 
         }
 
-        override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent) {
-            emitter.emit("ACTIVITY_RESULT", requestCode, resultCode, Converter.writeIntent(data))
+        override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
+            emitter.emit(
+                    "ACTIVITY_RESULT",
+                    requestCode,
+                    resultCode,
+                    if (data == null) null else Converter.writeIntent(data)
+            )
         }
     }
 
@@ -31,7 +36,7 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
             override fun emit(eventName: String, vararg data: Any?) {
                 context
                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-                        .emit(eventName, data)
+                        .emit("LocalEventEmission", Converter.writeLocalEvent(eventName, *data))
             }
         }
         context.addActivityEventListener(activityEventListener)
@@ -114,7 +119,7 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
         var needNewTask = false
         if (currentActivity == null) {
             c = context
-            if(!intent.getArray("flags").toArrayList().contains(Intent.FLAG_ACTIVITY_NEW_TASK.toDouble())) {
+            if (!intent.getArray("flags").toArrayList().contains(Intent.FLAG_ACTIVITY_NEW_TASK.toDouble())) {
                 needNewTask = true
             }
         } else {
@@ -124,7 +129,7 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
         try {
             val result = Converter.readIntent(c, intent.toHashMap(), callback)
             if (result != null) {
-                if(needNewTask) {
+                if (needNewTask) {
                     result.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 try {
@@ -169,7 +174,7 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
 
         @JvmStatic
         fun onBackPressed(vararg data: Any?) {
-            emitter.emit("BACK_PRESSED", data)
+            emitter.emit("BACK_PRESSED", *data)
         }
 
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import {NativeModules} from 'react-native';
 import Intent from './Intent';
-import {AndroidNavigatorEventType, AndroidNavigatorEventListener} from './Types';
+import {AndroidNavigatorEventType, AndroidNavigatorEventListener} from './Types/inbuilt';
 import Converter from "./utils/converter";
 import ErrorHandler from "./utils/errorHandler";
 import EventHolder from "./utils/eventHolder";

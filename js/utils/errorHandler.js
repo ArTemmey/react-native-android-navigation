@@ -1,4 +1,4 @@
-import {NavigationErrorMessage} from "../Types";
+import {NavigationErrorMessage} from "../Types/compilable";
 
 export class NavigationError extends Error {
     constructor(message: NavigationErrorMessage) {
@@ -19,7 +19,7 @@ export default class ErrorHandler {
     static getExecutor(resolve, reject) {
         return (result) => {
             if (typeof result === 'object' && result.hasOwnProperty('error')) {
-                if(typeof result.error === NavigationErrorMessage) {
+                if(NavigationErrorMessage.hasOwnProperty(result.error) ) {
                     reject(new NavigationError(result.error));
                 } else {
                     reject(new NoActivityError(result.error));

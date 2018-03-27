@@ -8,13 +8,6 @@ export default class Converter {
         }
     }
 
-    static getActivityResultReader(listener) {
-        return (eventData) => {
-            eventData[2] = this.readIntent(eventData[2]);
-            listener(eventData[0], eventData[1], eventData[2]);
-        }
-    }
-
     static readIntent(source) {
         const result = new Intent();
         result.className = source.className;

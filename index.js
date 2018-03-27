@@ -2,14 +2,16 @@ import AndroidNavigator from './js/AndroidNavigator';
 import Intent from './js/Intent';
 import {
     ActivityEventListener,
-    ActivityEventType,
     AndroidNavigatorEventListener,
     AndroidNavigatorEventType,
     BackPressListener,
     CustomServiceEventListener,
     CustomServiceEventType,
+} from './js/Types/inbuilt';
+import {
+    ActivityEventType,
     NavigationErrorMessage
-} from './js/Types';
+} from './js/Types/compilable';
 import {NavigationError, NoActivityError} from './js/utils/errorHandler';
 
 export {

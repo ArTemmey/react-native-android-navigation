@@ -104,7 +104,7 @@ Intent has four methods for initialization. Call them separately or in combinati
 
 1. `setClassName(className: string): Intent`
   
-	Use it separately if the target Activity is inside your application. Combine with `setPackage` if the target Activity is inside another application.
+	Use it separately if the target Activity is inside your application. Combine with `setPackageName` if the target Activity is inside another application.
   
 2. `setPackageName(packageName: string): Intent`
   
@@ -117,7 +117,7 @@ Intent has four methods for initialization. Call them separately or in combinati
 
 4. `setCustomServiceEventName(eventName: string): Intent`
 
-	Use it separately to start [your custom Service](#adding-custom-tasks). Combining with others will be ignored.
+	Use it separately to start [your custom Service](#adding-custom-tasks). Combine with `setPackageName` if the target Service is inside another application.
 
 #### Extras
 
@@ -144,7 +144,7 @@ intent
 
 ##### Getting
 
-In Java side extras get as usual. 
+On Java side, extras can be obtained as usual.
 For primitives and strings use `getBooleanExtra`, `getIntExtra`, `getDoubleExtra`, `getStringExtra`.
 For arrays and objects use `getSerializableExtra` and cast the result to `List` or `Map` respectively. Then if needed cast each their child to its class.
 
@@ -157,7 +157,7 @@ Map map = (Map) intent.getSerializableExtra("key4");
 double d = (Double) map.get("key2");
 ```
 
-In JS side just use the following methods:
+On JS side, just use the following methods:
   - `getExtra(key: string): any`
   - `getExtras(): Object`
 
@@ -183,8 +183,7 @@ Like the actions, all the default Android Intent categories and flags are declar
 
 Example:
 ```javascript
-intent.addCategory(Intent.CATEGORY_DEFAULT);
-intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+intent.addCategory(Intent.CATEGORY_DEFAULT).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 ```
 
 ### AndroidNavigator methods
@@ -201,13 +200,13 @@ To start new Activity, use the same methods as in Android:
   	
   - `static startActivityForResult(intent: Intent, requestCode: number): Promise<void>`
   
-  	Use it to get the data you need from the target Activity after it's finished.
+  	Use it to get the data you need from the target Activity after it's finished. `requestCode` can be any integer.
   	
   	[May trow error](#catching-errors)
 
 ##### Retrieving the result 
 
-To get the result, add `ACTIVITY_RESULT` event listener:
+To get the result, add event listener for the corresponding `ActivityEventType`:
 
 `export type ActivityResultListener = (requestCode: number, resultCode: number, data: Intent | null) => void`
 
@@ -216,14 +215,14 @@ Example:
 const myOnResult = (requestCode, resultCode, data) => {
     console.log(data.getExtras().key1);
 };
-AndroidNavigator.addEventListener("ACTIVITY_RESULT", myOnResult); //myOnResult will be called each time Activity result is received
+AndroidNavigator.addEventListener(ActivityEventType.ACTIVITY_RESULT, myOnResult); //myOnResult will be called each time Activity result is received
 ```
 
 ##### Handling the back press
 
 React Native Android Navigation allows you to pass any data from native side on back press event.
 
-In Java side open file `<YourProject>/android/app/src/main/java/your.package.name/MainActivity.java`:
+On Java side, open file `<YourProject>/android/app/src/main/java/your.package.name/MainActivity.java`:
 
   - Add `import com.navigation.NavigationModule;`
   - Add inside the Activity class:
@@ -234,7 +233,7 @@ In Java side open file `<YourProject>/android/app/src/main/java/your.package.nam
   }
   ```
 
-In JS side add `BACK_PRESSED` listener:
+On JS side, add event listener for the corresponding `ActivityEventType`:
 
 `export type BackPressListener = (...data: any) => void`
 
@@ -243,7 +242,7 @@ Example:
 const myOnBackPressed = (myData, oneTwoThree) => {
     console.log(myData);
 };
-AndroidNavigator.addEventListener("BACK_PRESSED", myOnBackPressed); //myOnBackPressed will be called each time back button is pressed
+AndroidNavigator.addEventListener(ActivityEventType.BACK_PRESSED, myOnBackPressed); //myOnBackPressed will be called each time back button is pressed
 ```
 
 ##### Other Activity methods
@@ -308,12 +307,15 @@ AndroidNavigator.startService(intent);
 The following errors can be thrown while using AndroidNavigator methods:
 
 ```javascript
-export type NavigationErrorMessage =
-    "TARGET_CLASS_NOT_FOUND" |
-    "TARGET_PACKAGE_NOT_FOUND" |
-    "TARGET_CLASS_IS_NOT_EXPORTED";
 export class NavigationError extends Error {
     constructor(message: NavigationErrorMessage) {}
+}
+```
+```typescript
+export enum NavigationErrorMessage {
+    TARGET_CLASS_NOT_FOUND = "TARGET_CLASS_NOT_FOUND",
+    TARGET_PACKAGE_NOT_FOUND = "TARGET_PACKAGE_NOT_FOUND",
+    TARGET_CLASS_NOT_EXPORTED = "TARGET_CLASS_NOT_EXPORTED"
 }
 ```
 ```javascript
