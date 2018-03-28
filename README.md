@@ -111,9 +111,8 @@ Intent has four methods for initialization. Call them separately or in combinati
 	Use it separately to get the launcher Intent for the target package. Combine with `setClassName` if you need to start a certain Activity from the target package.
 
 3. `setAction(action: string): Intent`
-  
-	On a separate use represents Android Intent constructor `public Intent(String action)`, on use in combination with others — Android Intent method `setAction`.
-	Note that JS Intent class has all the default Android Intent actions as static properties, so use them them the same way as in Android: `intent.setAction(Intent.ACTION_MAIN)`.
+
+	Represents Android Intent method `setAction`. Note that JS Intent class has all the default Android Intent actions as static properties, so use them them the same way as in Android: `intent.setAction(Intent.ACTION_MAIN)`.
 
 4. `setCustomServiceEventName(eventName: string): Intent`
 

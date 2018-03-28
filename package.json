@@ -1,6 +1,6 @@
 {
   "name": "react-native-android-navigation",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Android native navigation wrapper for React Native",
   "repository": {
     "type": "git",

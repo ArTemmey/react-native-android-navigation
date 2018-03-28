@@ -46,8 +46,8 @@ export default class AndroidNavigator {
         EventHolder.addEventListener(type, listener);
     }
 
-    static removeEventListener(type: AndroidNavigatorEventType, listener: AndroidNavigatorEventListener): void {
-        EventHolder.removeEventListener(type, listener);
+    static removeEventListener(type: AndroidNavigatorEventType, listener?: AndroidNavigatorEventListener): boolean {
+        return EventHolder.removeEventListener(type, listener);
     }
 
 }

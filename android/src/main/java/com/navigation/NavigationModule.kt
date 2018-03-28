@@ -15,13 +15,16 @@ import java.util.HashMap
 
 class NavigationModule(internal val context: ReactApplicationContext) : ReactContextBaseJavaModule(context) {
 
-    private val activityEventListener: ActivityEventListener = object : ActivityEventListener {
+    private val activityEventListener: ActivityEventListener =  object : ActivityEventListener {
 
         override fun onNewIntent(intent: Intent) {
 
         }
 
-        override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
+        override fun onActivityResult(activity: Activity,
+                                      requestCode: Int,
+                                      resultCode: Int,
+                                      data: Intent?) {
             emitter.emit(
                     "ACTIVITY_RESULT",
                     requestCode,
@@ -39,7 +42,6 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
                         .emit("LocalEventEmission", Converter.writeLocalEvent(eventName, *data))
             }
         }
-        context.addActivityEventListener(activityEventListener)
     }
 
     override fun getName(): String {
@@ -48,6 +50,16 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
 
     override fun getConstants(): Map<String, Any>? {
         return HashMap()
+    }
+
+    @ReactMethod
+    fun setListenerEnabled(enabled: Boolean) {
+        if(enabled) {
+            context.addActivityEventListener(activityEventListener)
+        } else {
+            context.removeActivityEventListener(activityEventListener)
+
+        }
     }
 
     @ReactMethod
@@ -138,7 +150,6 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
                 } catch (e: SecurityException) {
                     callback.invoke(Converter.writeError("TARGET_CLASS_NOT_EXPORTED"))
                 }
-
             }
         } catch (e: Exception) {
             callback.invoke(Converter.writeError(e.message))
@@ -149,7 +160,13 @@ class NavigationModule(internal val context: ReactApplicationContext) : ReactCon
     @ReactMethod
     fun setResult(resultCode: Int, data: ReadableMap?, callback: Callback) {
         try {
-            currentActivity!!.setResult(resultCode, if (data == null) null else Converter.readIntent(context, data.toHashMap(), callback))
+            currentActivity!!.setResult(
+                    resultCode,
+                    if (data == null)
+                        null
+                    else
+                        Converter.readIntent(context, data.toHashMap(), callback)
+            )
             callback.invoke()
         } catch (e: NullPointerException) {
             callback.invoke(Converter.writeError(e.message))

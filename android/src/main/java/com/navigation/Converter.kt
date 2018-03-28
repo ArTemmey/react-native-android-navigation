@@ -31,7 +31,7 @@ object Converter {
             if (!extrasSource.isEmpty()) {
                 val extrasResult = Bundle()
                 for (key in extrasSource.keys) {
-                    readDefaultIntentExtra(key as String, extrasSource[key], extrasResult)
+                    readIntentExtra(key as String, extrasSource[key], extrasResult)
                 }
                 if (result.hasExtra("type")) {
                     result.putExtra("extras", extrasResult)
@@ -87,20 +87,17 @@ object Converter {
                         callback.invoke(writeError("TARGET_CLASS_NOT_FOUND"))
                     }
                 }
-                if (result != null && action != null) {
-                    result.action = action
-                }
+
             } else if (packageName != null) {
                 result = current!!.packageManager.getLaunchIntentForPackage(packageName)
                 if (result == null) {
                     callback.invoke(writeError("TARGET_PACKAGE_NOT_FOUND"))
-                } else if (action != null) {
-                    result.action = action
                 }
-            } else if (action != null) {
-                result = Intent(action)
             } else {
                 result = Intent()
+            }
+            if (result != null && action != null) {
+                result.action = action
             }
         }
         return result
@@ -138,53 +135,13 @@ object Converter {
     }
 
 
-    private fun readDefaultIntentExtra(key: String, item: Any?, extras: Bundle) {
+    private fun readIntentExtra(key: String, item: Any?, extras: Bundle) {
         when (item) {
             is Boolean -> extras.putBoolean(key, item)
             is Int -> extras.putInt(key, item)
             is Double -> extras.putDouble(key, item)
             is String -> extras.putString(key, item)
-            else -> readCustomIntentExtra(
-                    item,
-                    object : IntentExtraReadingFinisher {
-                        override fun finishReading(itemItem: Any?) {
-                            if (itemItem is Bundle) {
-                                extras.putBundle(key, itemItem as Bundle?)
-                            } else {
-                                extras.putSerializable(key, itemItem as Serializable?)
-                            }
-                        }
-                    })
-        }
-    }
-
-    private fun readCustomIntentExtra(item: Any?, itemReader: IntentExtraReadingFinisher) {
-        if (item is Map<*, *>) {
-            val itemMutable = item.toMutableMap()
-            for (itemKey in item.keys) {
-                readCustomIntentExtra(
-                        item[itemKey],
-                        object : IntentExtraReadingFinisher {
-                            override fun finishReading(itemItem: Any?) {
-                                itemMutable[itemKey] = itemItem
-                            }
-                        }
-                )
-            }
-            itemReader.finishReading(itemMutable)
-        } else if (item is List<*>) {
-            val itemMutable = item.toMutableList()
-            for (i in item.indices) {
-                readCustomIntentExtra(
-                        item[i],
-                        object : IntentExtraReadingFinisher {
-                            override fun finishReading(itemItem: Any?) {
-                                itemMutable[i] = itemItem
-                            }
-                        }
-                )
-            }
-            itemReader.finishReading(itemMutable)
+            is Map<*, *>, is List<*> -> extras.putSerializable(key, item as Serializable?)
         }
     }
 
@@ -266,10 +223,6 @@ object Converter {
         val result = Arguments.createMap()
         result.putString("error", message)
         return result
-    }
-
-    private interface IntentExtraReadingFinisher {
-        fun finishReading(itemItem: Any?)
     }
 
 }
